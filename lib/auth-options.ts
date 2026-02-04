@@ -4,27 +4,6 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "./db";
 import bcrypt from "bcryptjs";
 
-// Extend the built-in types
-declare module "next-auth" {
-  interface User {
-    role?: string;
-  }
-  
-  interface Session {
-    user: {
-      id: string;
-      role?: string;
-    } & DefaultSession["user"];
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    id?: string;
-    role?: string;
-  }
-}
-
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -64,27 +43,24 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 30 * 24 * 60 * 60,
   },
   pages: {
     signIn: "/login",
     error: "/login",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: any) {
       if (user) {
-        // Cast user to any to avoid TypeScript errors
-        const userWithRole = user as any;
-        token.role = userWithRole.role;
-        token.id = userWithRole.id;
+        token.role = user.role;
+        token.id = user.id;
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: any) {
       if (session.user) {
-        // Cast to any to avoid TypeScript errors
-        (session.user as any).role = token.role;
-        (session.user as any).id = token.id;
+        session.user.role = token.role;
+        session.user.id = token.id;
       }
       return session;
     }
