@@ -4,6 +4,27 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "./db";
 import bcrypt from "bcryptjs";
 
+// Extend the built-in types
+declare module "next-auth" {
+  interface User {
+    role?: string;
+  }
+  
+  interface Session {
+    user: {
+      id: string;
+      role?: string;
+    } & DefaultSession["user"];
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    id?: string;
+    role?: string;
+  }
+}
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -52,7 +73,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        // Type assertion for user with role property
+        // Cast user to any to avoid TypeScript errors
         const userWithRole = user as any;
         token.role = userWithRole.role;
         token.id = userWithRole.id;
@@ -61,8 +82,9 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.role = token.role as string;
-        session.user.id = token.id as string;
+        // Cast to any to avoid TypeScript errors
+        (session.user as any).role = token.role;
+        (session.user as any).id = token.id;
       }
       return session;
     }
