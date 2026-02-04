@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 "use client";
 
 import { useState } from "react";
@@ -55,11 +57,11 @@ export default function LoginPage() {
           </div>
           <CardTitle className="text-2xl">{t.auth.login}</CardTitle>
           <p className="text-muted-foreground">
-            {language === "nl" 
+            {language === "nl"
               ? "Log in om door te gaan naar het platform"
               : "Sign in to continue to the platform"}
           </p>
-          
+
           {/* Language Switcher */}
           <div className="flex justify-center gap-2 mt-4">
             <Button
