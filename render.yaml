@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: webappmanagement
+    env: node
+    plan: free
+    region: oregon
+    buildCommand: |
+      npm install
+      npx prisma generate
+      npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXTAUTH_URL
+        value: https://webappmanagement.onrender.com
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+
+databases:
+  - name: webappmanagement-db
+    databaseName: webappmanagement
+    plan: free
+    region: oregon
