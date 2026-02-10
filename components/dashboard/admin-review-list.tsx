@@ -83,12 +83,11 @@ export function AdminReviewList() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           status: decision,
+        body: JSON.stringify({
           action: decision === "ACCEPTED" ? "accept" : decision === "DECLINED" ? "decline" : "return_to_support",
           adminNotes: adminNotes || null,
           declineReason: decision === "DECLINED" ? declineReason : null,
-      });
-
-      if (!res.ok) throw new Error("Error updating request");
+        }),
 
       const messages: Record<string, string> = {
         ACCEPTED: t.review.accepted,

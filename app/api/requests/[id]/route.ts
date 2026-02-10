@@ -77,15 +77,23 @@ export async function PUT(
       categoryId,
     } = body;
 
+
     // Support both action and status parameters for backward compatibility
-    let action = action;
-    if (!action && body.status) {
+    let actionParam = action;
+    if (!actionParamParam && body.status) {
       // Map old status values to action values
-      if (body.status === "ACCEPTED") action = "accept";
-      else if (body.status === "DECLINED") action = "decline";
-      else if (body.status === "RETURNED") action = "return_to_support";
+      if (body.status === "ACCEPTED") actionParam = "accept";
+      else if (body.status === "DECLINED") actionParam = "decline";
+      else if (body.status === "RETURNED") actionParam = "return_to_support";
     }
-    if (!action) {
+    if (!actionParamParam) {
+      return NextResponse.json(
+        { error: "Missing action or status parameter" },
+        { status: 400 }
+      );
+    }
+    // Support both action and status parameters for backward compatibility
+    if (!actionParam) {
       return NextResponse.json(
         { error: "Missing action or status parameter" },
         { status: 400 }
@@ -103,7 +111,7 @@ export async function PUT(
     let updateData: any = {};
 
     // Handle different actions based on role
-    if (action === "support_review" && user.role === Role.SUPPORT) {
+    if (actionParam === "support_review" && user.role === Role.SUPPORT) {
       if (existingRequest.status !== RequestStatus.SUBMITTED && existingRequest.status !== RequestStatus.RETURNED) {
         return NextResponse.json(
           { error: "Request is not available for support review" },
@@ -116,7 +124,7 @@ export async function PUT(
         priority: priority || existingRequest.priority,
         supportNotes: supportNotes || existingRequest.supportNotes,
       };
-    } else if (action === "submit_to_admin" && user.role === Role.SUPPORT) {
+    } else if (actionParam === "submit_to_admin" && user.role === Role.SUPPORT) {
       if (existingRequest.status !== RequestStatus.UNDER_REVIEW) {
         return NextResponse.json(
           { error: "Request must be under review to submit to admin" },
@@ -128,7 +136,7 @@ export async function PUT(
         priority: priority || existingRequest.priority,
         supportNotes: supportNotes || existingRequest.supportNotes,
       };
-    } else if (action === "accept" && user.role === Role.ADMIN) {
+    } else if (actionParam === "accept" && user.role === Role.ADMIN) {
       if (existingRequest.status !== RequestStatus.FINAL_REVIEW) {
         return NextResponse.json(
           { error: "Request must be in final review to accept" },
@@ -141,7 +149,7 @@ export async function PUT(
         finalPriority: finalPriority || existingRequest.priority,
         adminNotes: adminNotes || existingRequest.adminNotes,
       };
-    } else if (action === "decline" && user.role === Role.ADMIN) {
+    } else if (actionParam === "decline" && user.role === Role.ADMIN) {
       if (existingRequest.status !== RequestStatus.FINAL_REVIEW) {
         return NextResponse.json(
           { error: "Request must be in final review to decline" },
@@ -160,7 +168,7 @@ export async function PUT(
         declineReason,
         adminNotes: adminNotes || existingRequest.adminNotes,
       };
-    } else if (action === "return_to_support" && user.role === Role.ADMIN) {
+    } else if (actionParam === "return_to_support" && user.role === Role.ADMIN) {
       if (existingRequest.status !== RequestStatus.FINAL_REVIEW) {
         return NextResponse.json(
           { error: "Request must be in final review to return" },
