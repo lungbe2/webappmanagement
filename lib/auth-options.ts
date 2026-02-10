@@ -65,6 +65,8 @@ export const authOptions: NextAuthOptions = {
       return session;
     }
   },
+  // Make sure secret is properly set
   secret: process.env.NEXTAUTH_SECRET,
+  // Disable debug in production
   debug: process.env.NODE_ENV === "development",
 };
