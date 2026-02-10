@@ -80,13 +80,13 @@ export async function PUT(
 
     // Support both action and status parameters for backward compatibility
     let actionParam = action;
-    if (!actionParamParam && body.status) {
+    if (!actionParam && body.status) {
       // Map old status values to action values
       if (body.status === "ACCEPTED") actionParam = "accept";
       else if (body.status === "DECLINED") actionParam = "decline";
       else if (body.status === "RETURNED") actionParam = "return_to_support";
     }
-    if (!actionParamParam) {
+    if (!actionParam) {
       return NextResponse.json(
         { error: "Missing action or status parameter" },
         { status: 400 }
