@@ -77,6 +77,21 @@ export async function PUT(
       categoryId,
     } = body;
 
+    // Support both action and status parameters for backward compatibility
+    let action = action;
+    if (!action && body.status) {
+      // Map old status values to action values
+      if (body.status === "ACCEPTED") action = "accept";
+      else if (body.status === "DECLINED") action = "decline";
+      else if (body.status === "RETURNED") action = "return_to_support";
+    }
+    if (!action) {
+      return NextResponse.json(
+        { error: "Missing action or status parameter" },
+        { status: 400 }
+      );
+    }
+
     const existingRequest = await prisma.request.findUnique({
       where: { id: params.id },
     });
@@ -252,4 +267,13 @@ export async function DELETE(
       { status: 500 }
     );
   }
+}
+
+// PATCH - Alias for PUT to support both methods
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  // Simply call the PUT function
+  return PUT(request, { params });
 }
